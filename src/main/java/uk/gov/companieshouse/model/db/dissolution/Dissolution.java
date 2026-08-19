@@ -9,6 +9,7 @@ import uk.gov.companieshouse.model.enums.DissolutionStatus;
 import java.time.LocalDateTime;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Document(collection = "dissolutions")
@@ -142,6 +143,10 @@ public class Dissolution {
         if (newStatus == DissolutionStatus.SUBMITTED) {
             this.submittedAt = changedAt;
         }
+    }
+
+    public List<DissolutionStatusChanged> getStatusHistory() {
+        return Collections.unmodifiableList(statusHistory);
     }
 
     public String getTransactionId() {

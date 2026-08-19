@@ -373,12 +373,12 @@ class DissolutionServiceTest {
         void when_not_found_by_company_number_then_falls_back_to_pending_dissolution() {
             when(getter.getByCompanyNumber(COMPANY_NUMBER)).thenReturn(empty());
             when(getter.getPendingDissolution(COMPANY_NUMBER)).thenReturn(of(aDissolutionGetResponse()
-                    .withApplicationReference(APPLICATION_REFERENCE)
+                    .withDissolutionStatus(DissolutionStatus.PENDING)
                     .build()));
 
             var dissolutionDto = dissolutionService.resolveDissolutionApplication(USER_ID, COMPANY_NUMBER, PASS_THROUGH_HEADER);
 
-            assertThat(dissolutionDto.get().getApplicationReference()).isEqualTo(APPLICATION_REFERENCE);
+            assertThat(dissolutionDto.get().getDissolutionStatus()).isEqualTo(DissolutionStatus.PENDING);
         }
 
         @Test
@@ -387,13 +387,13 @@ class DissolutionServiceTest {
             when(getter.getPendingDissolution(COMPANY_NUMBER)).thenReturn(empty());
             when(repository.findFirstByCompanyNumberAndStatusOrderBySubmittedAtDesc(COMPANY_NUMBER, DissolutionStatus.SUBMITTED)).thenReturn(of(aDissolution()
                     .withTransactionId(TRANSACTION_ID)
-                    .withApplicationReference(APPLICATION_REFERENCE)
+                    .withStatus(DissolutionStatus.SUBMITTED)
                     .build()));
             when(transactionService.hasVerdictBeenReached(TRANSACTION_ID, PASS_THROUGH_HEADER)).thenReturn(false);
 
             var dissolutionDto = dissolutionService.resolveDissolutionApplication(USER_ID, COMPANY_NUMBER, PASS_THROUGH_HEADER);
 
-            assertThat(dissolutionDto.get().getApplicationReference()).isEqualTo(APPLICATION_REFERENCE);
+            assertThat(dissolutionDto.get().getDissolutionStatus()).isEqualTo(DissolutionStatus.SUBMITTED);
         }
 
         @Test
@@ -405,12 +405,12 @@ class DissolutionServiceTest {
                     .build()));
             when(transactionService.hasVerdictBeenReached(TRANSACTION_ID, PASS_THROUGH_HEADER)).thenReturn(true);
             when(getter.getDraftDissolution(USER_ID, COMPANY_NUMBER)).thenReturn(of(aDissolutionGetResponse()
-                    .withApplicationReference(APPLICATION_REFERENCE)
+                    .withDissolutionStatus(DissolutionStatus.DRAFT)
                     .build()));
 
             var dissolutionDto = dissolutionService.resolveDissolutionApplication(USER_ID, COMPANY_NUMBER, PASS_THROUGH_HEADER);
 
-            assertThat(dissolutionDto.get().getApplicationReference()).isEqualTo(APPLICATION_REFERENCE);
+            assertThat(dissolutionDto.get().getDissolutionStatus()).isEqualTo(DissolutionStatus.DRAFT);
         }
 
         @Test
@@ -419,12 +419,12 @@ class DissolutionServiceTest {
             when(getter.getPendingDissolution(COMPANY_NUMBER)).thenReturn(empty());
             when(repository.findFirstByCompanyNumberAndStatusOrderBySubmittedAtDesc(COMPANY_NUMBER, DissolutionStatus.SUBMITTED)).thenReturn(empty());
             when(getter.getDraftDissolution(USER_ID, COMPANY_NUMBER)).thenReturn(of(aDissolutionGetResponse()
-                    .withApplicationReference(APPLICATION_REFERENCE)
+                    .withDissolutionStatus(DissolutionStatus.DRAFT)
                     .build()));
 
             var dissolutionDto = dissolutionService.resolveDissolutionApplication(USER_ID, COMPANY_NUMBER, PASS_THROUGH_HEADER);
 
-            assertThat(dissolutionDto.get().getApplicationReference()).isEqualTo(APPLICATION_REFERENCE);
+            assertThat(dissolutionDto.get().getDissolutionStatus()).isEqualTo(DissolutionStatus.DRAFT);
         }
 
         @Test
