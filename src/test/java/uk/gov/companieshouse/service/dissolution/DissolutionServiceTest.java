@@ -161,7 +161,7 @@ class DissolutionServiceTest {
 
         when(getter.getByCompanyNumber(COMPANY_NUMBER)).thenReturn(Optional.of(response));
 
-        final Optional<DissolutionGetResponse> result = dissolutionService.getByCompanyNumber(COMPANY_NUMBER);
+        final Optional<DissolutionGetResponse> result = dissolutionService.findActiveDissolution(COMPANY_NUMBER);
 
         verify(getter).getByCompanyNumber(COMPANY_NUMBER);
 
@@ -297,22 +297,22 @@ class DissolutionServiceTest {
     }
 
     @Test
-    void getPendingDissolution_callsDissolutionGetter_getPendingDissolution() {
+    void getPendingDissolution_callsDissolutionGetter_findPendingDissolution() {
         final DissolutionGetResponse response = DissolutionFixtures.generateDissolutionGetResponse();
         when(getter.getPendingDissolution(COMPANY_NUMBER)).thenReturn(Optional.of(response));
 
-        final Optional<DissolutionGetResponse> result = dissolutionService.getPendingDissolution(COMPANY_NUMBER);
+        final Optional<DissolutionGetResponse> result = dissolutionService.findPendingDissolution(COMPANY_NUMBER);
 
         assertTrue(result.isPresent());
         assertEquals(response, result.get());
     }
 
     @Test
-    void getDraftDissolution_callsDissolutionGetter_getDraftDissolution() {
+    void getDraftDissolution_callsDissolutionGetter_findDraftDissolution() {
         final DissolutionGetResponse response = DissolutionFixtures.generateDissolutionGetResponse();
         when(getter.getDraftDissolution(USER_ID, COMPANY_NUMBER)).thenReturn(Optional.of(response));
 
-        final Optional<DissolutionGetResponse> result = dissolutionService.getDraftDissolution(USER_ID, COMPANY_NUMBER);
+        final Optional<DissolutionGetResponse> result = dissolutionService.findDraftDissolution(USER_ID, COMPANY_NUMBER);
 
         assertTrue(result.isPresent());
         assertEquals(response, result.get());
@@ -326,7 +326,7 @@ class DissolutionServiceTest {
         void when_no_submitted_dissolution_exists_then_returns_empty() {
             when(repository.findFirstByCompanyNumberAndStatusOrderBySubmittedAtDesc(COMPANY_NUMBER, DissolutionStatus.SUBMITTED)).thenReturn(Optional.empty());
 
-            var result = dissolutionService.getSubmittedDissolutionWithNoVerdict(COMPANY_NUMBER, PASS_THROUGH_HEADER);
+            var result = dissolutionService.findSubmittedDissolutionWithNoVerdict(COMPANY_NUMBER, PASS_THROUGH_HEADER);
 
             assertThat(result).isEmpty();
         }
@@ -337,7 +337,7 @@ class DissolutionServiceTest {
             when(repository.findFirstByCompanyNumberAndStatusOrderBySubmittedAtDesc(COMPANY_NUMBER, DissolutionStatus.SUBMITTED)).thenReturn(Optional.of(dissolution));
             when(transactionService.hasVerdictBeenReached(TRANSACTION_ID, PASS_THROUGH_HEADER)).thenReturn(false);
 
-            var result = dissolutionService.getSubmittedDissolutionWithNoVerdict(COMPANY_NUMBER, PASS_THROUGH_HEADER);
+            var result = dissolutionService.findSubmittedDissolutionWithNoVerdict(COMPANY_NUMBER, PASS_THROUGH_HEADER);
 
             assertThat(result.get().getApplicationReference()).isEqualTo(APPLICATION_REFERENCE);
         }
@@ -348,7 +348,7 @@ class DissolutionServiceTest {
             when(repository.findFirstByCompanyNumberAndStatusOrderBySubmittedAtDesc(COMPANY_NUMBER, DissolutionStatus.SUBMITTED)).thenReturn(Optional.of(dissolution));
             when(transactionService.hasVerdictBeenReached(TRANSACTION_ID, PASS_THROUGH_HEADER)).thenReturn(true);
 
-            var result = dissolutionService.getSubmittedDissolutionWithNoVerdict(COMPANY_NUMBER, PASS_THROUGH_HEADER);
+            var result = dissolutionService.findSubmittedDissolutionWithNoVerdict(COMPANY_NUMBER, PASS_THROUGH_HEADER);
 
             assertThat(result).isEmpty();
         }

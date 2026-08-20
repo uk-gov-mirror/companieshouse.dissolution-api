@@ -84,17 +84,17 @@ public class DissolutionService {
      * payment status is reconciled before being returned.
      */
     public Optional<DissolutionGetResponse> resolveDissolutionApplication(String userId, String companyNumber, String passThroughTokenHeader) {
-        var dissolutionDto = getByCompanyNumber(companyNumber)
-                .or(() -> getPendingDissolution(companyNumber))
-                .or(() -> getSubmittedDissolutionWithNoVerdict(companyNumber, passThroughTokenHeader))
-                .or(() -> getDraftDissolution(userId, companyNumber));
+        var dissolutionDto = findActiveDissolution(companyNumber)
+                .or(() -> findPendingDissolution(companyNumber))
+                .or(() -> findSubmittedDissolutionWithNoVerdict(companyNumber, passThroughTokenHeader))
+                .or(() -> findDraftDissolution(userId, companyNumber));
 
         dissolutionDto.ifPresent(this::reconcilePaymentStatus);
 
         return dissolutionDto;
     }
 
-    public Optional<DissolutionGetResponse> getByCompanyNumber(String companyNumber) {
+    public Optional<DissolutionGetResponse> findActiveDissolution(String companyNumber) {
         return getter.getByCompanyNumber(companyNumber);
     }
 
@@ -106,17 +106,17 @@ public class DissolutionService {
         return getter.isDirectorPendingApproval(companyNumber, officerId);
     }
 
-    public Optional<DissolutionGetResponse> getPendingDissolution(String companyNumber) {
+    public Optional<DissolutionGetResponse> findPendingDissolution(String companyNumber) {
         return getter.getPendingDissolution(companyNumber);
     }
 
-    public Optional<DissolutionGetResponse> getSubmittedDissolutionWithNoVerdict(String companyNumber, String passThroughTokenHeader) {
+    public Optional<DissolutionGetResponse> findSubmittedDissolutionWithNoVerdict(String companyNumber, String passThroughTokenHeader) {
         return repository.findFirstByCompanyNumberAndStatusOrderBySubmittedAtDesc(companyNumber, DissolutionStatus.SUBMITTED)
                 .filter(dissolution -> !transactionService.hasVerdictBeenReached(dissolution.getTransactionId(), passThroughTokenHeader))
                 .map(responseMapper::mapToDissolutionGetResponse);
     }
 
-    public Optional<DissolutionGetResponse> getDraftDissolution(String userId, String companyNumber) {
+    public Optional<DissolutionGetResponse> findDraftDissolution(String userId, String companyNumber) {
         return getter.getDraftDissolution(userId, companyNumber);
     }
 
